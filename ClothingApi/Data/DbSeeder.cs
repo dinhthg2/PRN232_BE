@@ -9,7 +9,7 @@ namespace ClothingApi.Data
         {
             await db.Database.MigrateAsync();
 
-            // Chỉ seed khi số lượng ít (tránh trùng lặp nhiều lần)
+            
             if (await db.Products.CountAsync() >= 24) return;
 
             var items = new List<Product>
@@ -28,7 +28,7 @@ namespace ClothingApi.Data
                 new() { Name="Coat", Description="Long coat", Price=120.0, Image="https://picsum.photos/seed/ct1/600/400" },
             };
 
-            // Thêm biến thể để đủ ~24 mẫu
+            
             for (int i = 2; i <= 12; i++)
             {
                 items.Add(new Product
