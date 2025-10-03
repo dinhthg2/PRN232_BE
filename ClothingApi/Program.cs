@@ -1,48 +1,76 @@
 ﻿using ClothingApi.Data;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1) Lấy connection string (ưu tiên ENV để deploy, fallback appsettings.json)
-var conn = Environment.GetEnvironmentVariable("CONNECTION_STR")
-           ?? builder.Configuration.GetConnectionString("DefaultConnection");
+// 1) Connection string: ENV trước, fallback appsettings.json
+var conn =
+    Environment.GetEnvironmentVariable("CONNECTION_STR")
+    ?? builder.Configuration.GetConnectionString("DefaultConnection");
 
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(conn));
+builder.Services.AddDbContext<AppDbContext>(opt => opt.UseNpgsql(conn));
 
-// 2) CORS (cho phép FE gọi API, cấu hình từ appsettings.json: "AllowedOrigins")
+// 2) CORS: lấy từ ENV "AllowedOrigins" (hoặc appsettings.json), split + trim
+var allowedOriginsRaw =
+    Environment.GetEnvironmentVariable("AllowedOrigins")
+    ?? builder.Configuration["AllowedOrigins"];
+
+var allowedOrigins = (allowedOriginsRaw ?? string.Empty)
+    .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+// 2b) Đăng ký CORS policy
 builder.Services.AddCors(opt =>
 {
     opt.AddPolicy("AppCors", p =>
-        p.WithOrigins(builder.Configuration["AllowedOrigins"]!.Split(','))
-         .AllowAnyHeader()
-         .AllowAnyMethod());
+    {
+        if (allowedOrigins.Length > 0)
+        {
+            p.WithOrigins(allowedOrigins)
+             .AllowAnyHeader()
+             .AllowAnyMethod()
+             .WithExposedHeaders("Location");
+        }
+        else
+        {
+            // Dev fallback: chưa set origin thì mở hết (không dùng cho prod)
+            p.SetIsOriginAllowed(_ => true)
+             .AllowAnyHeader()
+             .AllowAnyMethod()
+             .WithExposedHeaders("Location");
+        }
+    });
 });
 
-// 3) Add Controllers + Swagger
+// 3) MVC + Swagger
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// 4) Swagger luôn bật cho dev
+// 4) Proxy headers (Render/Vercel)
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+});
+
+// 5) Swagger (để test nhanh)
 app.UseSwagger();
 app.UseSwaggerUI();
 
-// 5) Middleware CORS
+// 6) CORS PHẢI trước MapControllers
 app.UseCors("AppCors");
 
-// 6) Map Controllers
+// 7) Endpoints
 app.MapControllers();
+app.MapGet("/api/health", () => Results.Ok(new { ok = true, time = DateTimeOffset.UtcNow }));
 
-// 7) Health check endpoint
-app.MapGet("/api/health", () => Results.Ok(new { ok = true }));
-
-// 8) Seed dữ liệu mẫu khi start app
+// 8) Auto-migrate + seed
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    await db.Database.MigrateAsync();
     await DbSeeder.SeedAsync(db);
 }
 

@@ -1,5 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
-using ClothingApi.Models;
+﻿using ClothingApi.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace ClothingApi.Data
 {
@@ -7,41 +7,59 @@ namespace ClothingApi.Data
     {
         public static async Task SeedAsync(AppDbContext db)
         {
-            await db.Database.MigrateAsync();
+            // Nếu đã có >= 60 sp thì thôi
+            if (await db.Products.CountAsync() >= 60) return;
 
-            
-            if (await db.Products.CountAsync() >= 24) return;
+            var now = DateTimeOffset.UtcNow;
+            // Tag để phân biệt đợt seed mới => nhìn vào DB thấy ngay là đã đổi
+            var dropTag = $"Drop-{now:yyyyMMdd}";
 
-            var items = new List<Product>
+            var batch = new List<Product>
             {
-                new() { Name="T-Shirt", Description="Cotton tee", Price=19.9, Image="https://picsum.photos/seed/t1/600/400" },
-                new() { Name="Hoodie", Description="Fleece hoodie", Price=39.5, Image="https://picsum.photos/seed/h1/600/400" },
-                new() { Name="Jeans", Description="Denim blue", Price=49.0, Image="https://picsum.photos/seed/j1/600/400" },
-                new() { Name="Sneakers", Description="Lightweight shoes", Price=59.0, Image="https://picsum.photos/seed/s1/600/400" },
-                new() { Name="Cap", Description="Classic cap", Price=12.0, Image="https://picsum.photos/seed/c1/600/400" },
-                new() { Name="Jacket", Description="Windbreaker", Price=79.0, Image="https://picsum.photos/seed/jk1/600/400" },
-                new() { Name="Skirt", Description="Pleated", Price=34.0, Image="https://picsum.photos/seed/sk1/600/400" },
-                new() { Name="Dress", Description="Summer dress", Price=45.0, Image="https://picsum.photos/seed/d1/600/400" },
-                new() { Name="Shorts", Description="Linen shorts", Price=22.0, Image="https://picsum.photos/seed/sh1/600/400" },
-                new() { Name="Sweater", Description="Wool sweater", Price=55.0, Image="https://picsum.photos/seed/sw1/600/400" },
-                new() { Name="Blazer", Description="Office wear", Price=89.0, Image="https://picsum.photos/seed/bz1/600/400" },
-                new() { Name="Coat", Description="Long coat", Price=120.0, Image="https://picsum.photos/seed/ct1/600/400" },
+                new() { Name=$"{dropTag} T-Shirt Classic",   Description="Cotton tee",          Price=19.9, Image="https://picsum.photos/seed/dt1/800/500", CreatedAt=now, UpdatedAt=now },
+                new() { Name=$"{dropTag} Hoodie Fleece",     Description="Fleece hoodie",       Price=39.5, Image="https://picsum.photos/seed/dh1/800/500", CreatedAt=now, UpdatedAt=now },
+                new() { Name=$"{dropTag} Jeans Blue",        Description="Denim blue",          Price=49.0, Image="https://picsum.photos/seed/dj1/800/500", CreatedAt=now, UpdatedAt=now },
+                new() { Name=$"{dropTag} Sneakers Lite",     Description="Lightweight shoes",   Price=59.0, Image="https://picsum.photos/seed/ds1/800/500", CreatedAt=now, UpdatedAt=now },
+                new() { Name=$"{dropTag} Cap Classic",       Description="Classic cap",         Price=12.0, Image="https://picsum.photos/seed/dc1/800/500", CreatedAt=now, UpdatedAt=now },
+                new() { Name=$"{dropTag} Jacket Wind",       Description="Windbreaker",         Price=79.0, Image="https://picsum.photos/seed/djk1/800/500",CreatedAt=now, UpdatedAt=now },
+                new() { Name=$"{dropTag} Dress Summer",      Description="Summer dress",        Price=45.0, Image="https://picsum.photos/seed/dd1/800/500", CreatedAt=now, UpdatedAt=now },
+                new() { Name=$"{dropTag} Sweater Wool",      Description="Wool sweater",        Price=55.0, Image="https://picsum.photos/seed/dsw1/800/500",CreatedAt=now, UpdatedAt=now },
+                new() { Name=$"{dropTag} Blazer Office",     Description="Office blazer",       Price=89.0, Image="https://picsum.photos/seed/dbz1/800/500",CreatedAt=now, UpdatedAt=now },
+                new() { Name=$"{dropTag} Coat Long",         Description="Long coat",           Price=120.0,Image="https://picsum.photos/seed/dct1/800/500",CreatedAt=now, UpdatedAt=now },
             };
 
-            
-            for (int i = 2; i <= 12; i++)
+            // Sinh thêm biến thể (tổng khoảng 40 sp)
+            for (int i = 1; i <= 15; i++)
             {
-                items.Add(new Product
+                batch.Add(new Product
                 {
-                    Name = $"T-Shirt {i}",
+                    Name = $"{dropTag} T-Shirt {i}",
                     Description = "Cotton tee",
                     Price = 15 + i,
-                    Image = $"https://picsum.photos/seed/t{i}/600/400"
+                    Image = $"https://picsum.photos/seed/dt{i + 1}/800/500",
+                    CreatedAt = now.AddMinutes(-i),
+                    UpdatedAt = now.AddMinutes(-i)
+                });
+                batch.Add(new Product
+                {
+                    Name = $"{dropTag} Sneakers {i}",
+                    Description = "Lightweight shoes",
+                    Price = 49 + i,
+                    Image = $"https://picsum.photos/seed/ds{i + 1}/800/500",
+                    CreatedAt = now.AddMinutes(-i * 2),
+                    UpdatedAt = now.AddMinutes(-i * 2)
                 });
             }
 
-            db.Products.AddRange(items);
-            await db.SaveChangesAsync();
+            // Chỉ chèn những tên chưa có (an toàn khi redeploy)
+            var existing = await db.Products.Select(p => p.Name).ToListAsync();
+            var toInsert = batch.Where(p => !existing.Contains(p.Name)).ToList();
+
+            if (toInsert.Count > 0)
+            {
+                db.Products.AddRange(toInsert);
+                await db.SaveChangesAsync();
+            }
         }
     }
 }
