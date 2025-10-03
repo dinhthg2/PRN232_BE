@@ -1,0 +1,59 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "D:\\Fall2025\\PRN232\\ClothingApi\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{E49A970C-5E76-4F55-9C4C-5014CF906D75}|ClothingApi\\ClothingApi.csproj|d:\\fall2025\\prn232\\clothingapi\\clothingapi\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{E49A970C-5E76-4F55-9C4C-5014CF906D75}|ClothingApi\\ClothingApi.csproj|solutionrelative:clothingapi\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E49A970C-5E76-4F55-9C4C-5014CF906D75}|ClothingApi\\ClothingApi.csproj|d:\\fall2025\\prn232\\clothingapi\\clothingapi\\data\\appdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E49A970C-5E76-4F55-9C4C-5014CF906D75}|ClothingApi\\ClothingApi.csproj|solutionrelative:clothingapi\\data\\appdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 2,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{34e76e81-ee4a-11d0-ae2e-00a0c90fffc3}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{b1e99781-ab81-11d0-b683-00aa00a3ee26}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "D:\\Fall2025\\PRN232\\ClothingApi\\ClothingApi\\appsettings.json",
+              "RelativeDocumentMoniker": "ClothingApi\\appsettings.json",
+              "ToolTip": "D:\\Fall2025\\PRN232\\ClothingApi\\ClothingApi\\appsettings.json",
+              "RelativeToolTip": "ClothingApi\\appsettings.json",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2025-10-02T14:00:15.445Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "AppDbContext.cs",
+              "DocumentMoniker": "D:\\Fall2025\\PRN232\\ClothingApi\\ClothingApi\\Data\\AppDbContext.cs",
+              "RelativeDocumentMoniker": "ClothingApi\\Data\\AppDbContext.cs",
+              "ToolTip": "D:\\Fall2025\\PRN232\\ClothingApi\\ClothingApi\\Data\\AppDbContext.cs",
+              "RelativeToolTip": "ClothingApi\\Data\\AppDbContext.cs",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-01T15:54:26.549Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
